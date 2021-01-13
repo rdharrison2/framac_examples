@@ -2,17 +2,26 @@
 #include <stdio.h>
 
 /*@
-  requires 0 <= len;
-  requires \valid_read(arr + (0..len-1));
-  requires Sorted:
-    \forall integer i, j; 0 <= i <= j < len ==> arr[i] <= arr[j] ;
+  predicate valid_range_rw(int* arr, integer n) =
+    n >= 0 && \valid(arr + (0 .. n-1));
+  predicate valid_range_r(int* arr, integer n) =
+    n >= 0 && \valid_read(arr + (0 .. n-1));
+  predicate sorted(int* arr, integer n) =
+    \forall integer i, j; 0 <= i <= j < n ==> arr[i] <= arr[j];
+  predicate contains(int* arr, integer n, integer elem) =
+    \exists integer off; 0 <= off < n && arr[off] == elem;
+*/
+
+/*@
+  requires valid_range_r(arr, len);
+  requires sorted(arr, len);
   assigns \nothing;
   behavior in:
-    assumes \exists integer off; 0 <= off < len && arr[off] == value;
+    assumes contains(arr, len, value);
     ensures arr[\result] == value;
     ensures 0 <= \result <= len-1;
   behavior notin:
-    assumes \forall integer off; 0 <= off < len ==> arr[off] != value;
+    assumes !contains(arr, len, value);
     ensures \result == -1;
   disjoint behaviors;
   complete behaviors;
